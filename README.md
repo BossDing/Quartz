@@ -251,3 +251,63 @@ QuartzTest.java
 	Thread.sleep(60000)让线程睡眠一段时间。
 
 好了，自己去探索吧！
+
+#Quartz教程
+##第一节，使用Quartz
+在你使用程序调度之前，你先需要初始化。要做到这一点，你需要使用到SchedulerFactory。一些Quartz的用户可能在JNDI存储的工厂保存一个实例，其他人可能发现直接使用一个工厂实例化石非常方便的。
+
+一旦调度器被实例化它就启动了，并放置在单独的模块中，然后关闭。注意，一旦调度器关闭，它不能在没有重新实例化的情况下重新启动。触发器不会执行（作业不执行）知道调度器开始启动，它会一直处于暂停的状态。
+
+以下是快速代码片段,实例化并启动调度器以及调度一个作业执行：
+
+#
+	SchedulerFactory schedFact = new org.quartz.impl.StdSchedulerFactory();
+	Scheduler sched = schedFact.getScheduler();
+	sched.start();
+	// define the job and tie it to our HelloJob class
+	JobDetail job = newJob(HelloJob.class).withIdentity("myJob", "group1")
+      .build();
+
+	// Trigger the job to run now, and then every 40 seconds
+	Trigger trigger = newTrigger().withIdentity("myTrigger", "group1").startNow()
+      .withSchedule(simpleSchedule()
+          .withIntervalInSeconds(40).repeatForever()).build();
+	// Tell quartz to schedule the job using our trigger
+	sched.scheduleJob(job, trigger);
+#
+
+正如上面的你可以看到，使用Quartz是相当简单的，在第二节中，我们将给出作业、触发器以及Quartz相关的API的介绍让你更加理解这个实例
+
+##第二节，Quartz API,作业和触发器
+###Quartz API
+Quartz关键的接口如下：
+
+* Scheduler ：调度最主要的接口API
+
+* Job ：你想通过调度器执行的组件需要实现的一个接口
+
+* JobDetail ： 用来定义一个作业的实例
+
+* Trigger ：一个定义了调度器将执行给定的作业列表的组件
+
+* JobBuilder ：用来定义/构建JobDetail的实例并且定义了jobs的实例
+
+* TriggerBuilder ：定义/构建触发器的实例
+
+调度器的生命周期是根据它创建为边界的，通过SchedulerFactory和调用它的shutdown()方法。一旦创建了调度器的接口，那么它可以添加、移除和列出它所有的作业、触发器以及运行其他调度相关的操作（例如暂停一个触发器）。然而，调度不会在任何的触发器上确切的执行直到它调用了start()方法。
+
+Quartz提供了  "builder"类来定义了一种特定领域的语言（DSL），在之前的小节中你看到了如下的例子，以下是其中的一部分：
+	
+	// define the job and tie it to our HelloJob class
+	JobDetail job = newJob(HelloJob.class)
+      .withIdentity("myJob", "group1") // name "myJob", group "group1"
+      .build();
+
+	// Trigger the job to run now, and then every 40 seconds
+	Trigger trigger = newTrigger().withIdentity("myTrigger", "group1")
+      .startNow().withSchedule(simpleSchedule()
+          .withIntervalInSeconds(40).repeatForever()).build();
+
+	// Tell quartz to schedule the job using our trigger
+	sched.scheduleJob(job, trigger);
+
