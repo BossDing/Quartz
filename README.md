@@ -311,3 +311,29 @@ Quartz提供了  "builder"类来定义了一种特定领域的语言（DSL），
 	// Tell quartz to schedule the job using our trigger
 	sched.scheduleJob(job, trigger);
 
+上面的代码块使用了静态引入的JobBuilder类来构建和定义作业，同样的,建立触发器的代码块使用TriggerBuilder类的方法——以及SimpleScheduleBulder类等。
+
+DSL的静态导入可以通过这样的导入语句
+
+	import static org.quartz.JobBuilder.*;
+	import static org.quartz.SimpleScheduleBuilder.*;
+	import static org.quartz.CronScheduleBuilder.*;
+	import static org.quartz.CalendarIntervalScheduleBuilder.*;
+	import static org.quartz.TriggerBuilder.*;
+	import static org.quartz.DateBuilder.*;
+
+ScheduleBuilder类定义了许多不同类型的调度器方法，DateBuilder类包含了许多方法以方便构造java.util.Date的实例。
+
+###作业和触发器
+作业是实现了Job接口的类，它只有一个简单的方法
+
+Job接口
+
+	package org.quartz;
+
+	public interface Job {
+
+    public void execute(JobExecutionContext context) throws JobExecutionException;
+
+	}
+
