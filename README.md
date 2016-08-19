@@ -342,7 +342,7 @@ Job接口
 
 JobDetail对象是由Quartz客户端（你的程序）在作业被添加到调度器时创建的。它包含了各种各样为作业设置的属性，同时包含了JobDataMap，主要是用来存储你给定的作业类的实例的状态信息。它本质上是作业实例的定义,我们将在接下来的课进一步讨论该细节。
 
-触发器对象用来触发作业的执行。当你希望调度一个作业，你实例化一个触发器并“优化”它的属性给调度器，触发器同样也可能有关联的JobDataMap 对象，通过参数传递给作业来触发触发器是非常有用的。Quartz附带了一些不同类型的触发器，但是其中最经常使用的是SimpleTrigger和SimpleTrigger。
+触发器对象用来触发作业的执行。当你希望调度一个作业，你实例化一个触发器并“优化”它的属性，触发器同样也可能有关联的JobDataMap对象，通过参数传递给作业来触发触发器是非常有用的。Quartz附带了一些不同类型的触发器，但是其中最经常使用的是SimpleTrigger和SimpleTrigger。
 
 如果你需要一次执行（只是在给定的时间内单一执行作业），或者如果你需要在给定的时间执行作业，并且让它重复N次，每两次之间延迟T，那么SimpleTrigger触发器是非常方便的。你过你希望可以根据时间进行调度，如“每个星期五,中午”或“在10:15在每个月的第十天”，那么CronTrigger对象是非常有用的。
 
@@ -354,3 +354,45 @@ JobDetail对象是由Quartz客户端（你的程序）在作业被添加到调�
 作业和触发器所授予的密钥是咋调度器上注册的，作业和触发器的密钥（JobKey 和TriggerKey）允许被放置在“组”中让你方便的组织你的触发器和作业来进行分类，例如“reporting jobs”和“maintenance jobs”，作业和触发器的密钥名字的部分在组中必须是唯一的。
 
 ##第三节 更多关于作业和作业细节
+
+正如你在第二节中所看到的，作业是相当容易实现的，只需要实现唯一的一个“execute”方法。你只需要了解关于job接口的execute(..)方法和JobDetails很少的一部分知识。
+
+当你实现的job类的代码实现了如何去完成特定类型的作业的真正的工作，Quartz需要被通知到那些你希望有的作业的实例的各种属性。这些工作是由在上一个小节中所介绍的JobDetail类来完成的。
+
+JobDetail的实例是由JobBuilder类来构建的，你通常希望用静态引入来引入这些方法，你需要有如下的代码在你的代码中：
+
+	import static org.quartz.JobBuilder.*;
+
+现在让我们花点时间来讨论关于在Quartz中job的实例的特性和作业的生命周期。第一步让我们回顾一些在第一节中的代码片段：
+	
+	  // define the job and tie it to our HelloJob class
+	  JobDetail job = newJob(HelloJob.class)
+	      .withIdentity("myJob", "group1") // name "myJob", group "group1"
+	      .build();
+	
+	  // Trigger the job to run now, and then every 40 seconds
+	  Trigger trigger = newTrigger()
+	      .withIdentity("myTrigger", "group1")
+	      .startNow()
+	      .withSchedule(simpleSchedule()
+	          .withIntervalInSeconds(40)
+	          .repeatForever())            
+	      .build();
+	
+	  // Tell quartz to schedule the job using our trigger
+	  sched.scheduleJob(job, trigger); 
+
+现在假设“HelloJob”类的定义如下：
+
+	  public class HelloJob implements Job {
+
+	    public HelloJob() {
+	    }
+	
+	    public void execute(JobExecutionContext context)
+	      throws JobExecutionException
+	    {
+	      System.err.println("Hello!  HelloJob is executing.");
+	    }
+	  }
+
