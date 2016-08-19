@@ -396,3 +396,40 @@ JobDetail的实例是由JobBuilder类来构建的，你通常希望用静态引�
 	    }
 	  }
 
+注意到我们给出的JobDetail调度器的实例，他通过我们的由JobDetail类构建的job类来直到要质性的作业的类型。每次调度器执行作业，它在调用execute(..)方法之前都会创建一个该类的实例。当作业质性完成，指向该作业的引用被销毁，该实例也被垃圾收集器回收。这种行为的后果之一是该作业【 必须要有一个无参的构造方法（当使用默认的JobFactory实现），另一个后果是定义在作业类上的数据字段的状态是毫无意义的，也就是它们的值是不会被保存在作业的执行器上面的。
+
+你可能想问：“我怎样才能为作业的实例提供属性/配置呢？”和“我怎么在作业的执行期间来跟踪作业的状态？”，这些问题的答案是一样的：关键是JobDetail对象的部分JobDataMap类。
+
+###JobDataMap
+JobDataMap可以用来保存任何数量的你希望的在作业执行时作业实例的（序列化的）数据对象。JobDataMap 是一个实现了Java中Map接口的类，它还增加了一些很方便的方法来存储和检索数据的原始类型。
+
+下面是一些在当创建/定义JobDetail时把数据放进JobDataMap的片段，并添加到之前定义的调度器上：
+
+	  // define the job and tie it to our DumbJob class
+	  JobDetail job = newJob(DumbJob.class)
+      .withIdentity("myJob", "group1") // name "myJob", group "group1"
+      .usingJobData("jobSays", "Hello World!")
+      .usingJobData("myFloatValue", 3.141f)
+      .build();
+
+下面是在作业的执行期间从JobDataMap获取数据的片段：
+
+	public class DumbJob implements Job {
+	
+	    public DumbJob() {
+	    }
+	
+	    public void execute(JobExecutionContext context)
+	      throws JobExecutionException{
+	      JobKey key = context.getJobDetail().getKey();
+	
+	      JobDataMap dataMap = context.getJobDetail().getJobDataMap();
+	
+	      String jobSays = dataMap.getString("jobSays");
+	      float myFloatValue = dataMap.getFloat("myFloatValue");
+	
+	      System.err.println("Instance " + key + " of DumbJob says: " + jobSays + ", and val is: " + myFloatValue);
+	    }
+	}
+
+
