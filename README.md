@@ -1,5 +1,5 @@
 # Quartz 企业作业队调度框架
-根据官方主要文档翻译而来，主要版本为2.2.x，查看[官方文档](http://www.quartz-scheduler.org/documentation/quartz-2.2.x/quick-start.html)
+###根据官方主要文档翻译而来，主要版本为2.2.x，查看[官方文档](http://www.quartz-scheduler.org/documentation/quartz-2.2.x/quick-start.html)
 ###什么是Quartz 企业作业队调度框架？
 Quartz是一款可以集成在从小型的独立运行的应用程序到大型的商务系统的几乎所有的java应用程序的一款功能丰富、开放源代码的作业调度类库。Quartz可以为执行十个、百个、甚至是成千上外的作业创建简单或复杂的的调度。他们的任务是定义为一个标准的java组件，可以执行几乎任何你可以计划去做的工作。Quartz调度包括很多企业级功能，如JTA事务支持和聚类。<br>
 
@@ -258,7 +258,7 @@ QuartzTest.java
 <br>
 <br>
 #Quartz教程
-#
+###以下根据[官方文档](http://www.quartz-scheduler.org/documentation/quartz-2.2.x/tutorials/)翻译
 ##第一节，使用Quartz
 在你使用程序调度之前，你先需要进行初始化。要做到这一点，你需要使用到SchedulerFactory。一些Quartz的用户可能在JNDI存储的工厂保存一个实例，其他人可以直接使用该工厂进行实例化，这是非常方便的。
 
@@ -401,9 +401,9 @@ JobDetail的实例是由JobBuilder类来构建的，你通常希望用静态引�
 	    }
 	  }
 
-注意到我们给出的JobDetail调度器的实例，他通过我们的由JobDetail类构建的job类来直到要质性的作业的类型。每次调度器执行作业，它在调用execute(..)方法之前都会创建一个该类的实例。当作业质性完成，指向该作业的引用被销毁，该实例也被垃圾收集器回收。这种行为的后果之一是该作业【 必须要有一个无参的构造方法（当使用默认的JobFactory实现），另一个后果是定义在作业类上的数据字段的状态是毫无意义的，也就是它们的值是不会被保存在作业的执行器上面的。
+注意到我们给出的JobDetail调度器的实例，他通过我们的由JobDetail类构建的job类来直到要质性的作业的类型。每次调度器执行作业，它在调用execute(..)方法之前都会创建一个该类的实例。当作业质性完成，指向该作业的引用被销毁，该实例也被垃圾收集器回收。这种行为的后果之一是该作业必须要有一个无参的构造方法（当使用默认的JobFactory实现），另一个后果是定义在作业类上的数据字段的状态是毫无意义的，也就是它们的值是不会被保存在作业的执行器上面的。
 
-你可能想问：“我怎样才能为作业的实例提供属性/配置呢？”和“我怎么在作业的执行期间来跟踪作业的状态？”，这些问题的答案是一样的：关键是JobDetail对象的部分JobDataMap类。
+你可能想问：“我怎样才能为作业的实例提供属性/配置呢？”和“我怎么在作业的执行期间来跟踪作业的状态？”，这些问题的答案是一样的：关键是作为JobDetail对象的属性的JobDataMap类。
 
 ###JobDataMap
 JobDataMap可以用来保存任何数量的你希望的在作业执行时作业实例的（序列化的）数据对象。JobDataMap 是一个实现了Java中Map接口的类，它还增加了一些很方便的方法来存储和检索数据的原始类型。
@@ -436,5 +436,37 @@ JobDataMap可以用来保存任何数量的你希望的在作业执行时作业�
 	      System.err.println("Instance " + key + " of DumbJob says: " + jobSays + ", and val is: " + myFloatValue);
 	    }
 	}
+
+
+
+<br>
+<br>
+<br>
+<br>
+<br>
+##关于在spring下集成Quartz
+Spring集成了Quartz，我们可以在spring下配置Quartz用来作业调度的工作
+
+(1). compile 'org.quartz-scheduler:quartz:2.2.1'依赖
+
+(2).在web.xml中配置了spring-quartz配置文件，文件名随意
+
+    <init-param>
+			<param-name>contextConfigLocation</param-name>
+			<param-value>
+				classpath:spring-mvc-servlet.xml
+				classpath:spring-quartz-task.xml
+			</param-value>
+	</init-param>
+
+(3).spring-quartz-task.xml
+
+a.配置触发器的启动org.springframework.scheduling.quartz.SchedulerFactoryBean，其实也是spring集成在spring-context包下的，该bean在服务器启动时被加载，该bean有一个triggers属性，可以一次性配置多个触发器
+
+b.quartz触发器配置，org.springframework.scheduling.quartz.CronTriggerFactoryBean，主要配置触发器的时间表达式信息
+
+c.作业配置，具体调度哪个作业，也是个bean，包括bean的id，执行的方法等
+
+该项目在[]()
 
 
