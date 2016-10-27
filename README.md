@@ -437,6 +437,8 @@ JobDataMap可以用来保存任何数量的你希望的在作业执行时作业�
 	    }
 	}
 
+如果你使用的是一个持久化的JobStore对象(在这部分的JobStore会详细讨论),你应该在JobDataMap对象的属性时注意一些，因为该对象会被序列化，	因此他们可能会一起类版本的问题。明显的，标准的Java类型应该是非常安全的，但是想想，有时候某人改变了你序列化的实例的属性，但是在这种情况下必须不能打破兼容性问题。
+
 
 
 <br>
@@ -467,6 +469,6 @@ b.quartz触发器配置，org.springframework.scheduling.quartz.CronTriggerFacto
 
 c.作业配置，具体调度哪个作业，也是个bean，包括bean的id，执行的方法等
 
-该项目在[]()
+该项目在[下载](https://github.com/silence940109/SSM/archive/1.1.zip)可以找到
 
 
